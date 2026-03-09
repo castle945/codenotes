@@ -1,0 +1,17 @@
+services:
+  nginx:
+    image: nginx:1.27-bookworm-perl
+    restart: always
+    network_mode: host
+    volumes:
+      - ${nginx_config_path}:/etc/nginx/conf.d
+    container_name: nginx-server
+
+# command: 
+# docker run -itd --restart=always --network=host -v $(pwd)/nginx_config:/etc/nginx/conf.d nginx:1.27-bookworm-perl --name nginx-server
+# export nginx_config_path="$(pwd)/nginx_config" && docker compose -f docker-nginx.yml up -d
+
+# client config:
+# export server_ip="192.10.84.160" && echo "$server_ip njust.test.com" | sudo tee -a /etc/hosts > /dev/null
+# export server_ip="192.10.84.160" && echo "$server_ip njust.docker.com ui.njust.docker.com" | sudo tee -a /etc/hosts > /dev/null
+# export server_ip="192.10.84.160" && echo "$server_ip njust.gitlab.com gitlab.example.comm" | sudo tee -a /etc/hosts > /dev/null

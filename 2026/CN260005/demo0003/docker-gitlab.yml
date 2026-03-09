@@ -1,0 +1,27 @@
+services:
+  gitlab-ce:
+    image: gitlab/gitlab-ce:17.6.1-ce.0
+    restart: always
+    hostname: gitlab.example.com
+    ports:
+      - 8929:80
+      - 2424:22
+    environment:
+      GITLAB_ROOT_EMAIL: "2654229893@qq.com"
+      GITLAB_ROOT_PASSWORD: "1qaz@WSX"
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.example.comm'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2424
+    volumes:
+      # 挂载这些路径后，网页中操作的配置和新建的仓库都会保存，重启镜像不会丢失
+      - ${gitlab_path}/config:/etc/gitlab
+      - ${gitlab_path}/logs:/var/log/gitlab
+      - ${gitlab_path}/data:/var/opt/gitlab
+    container_name: gitlab-ce
+
+# external_url 'http://gitlab.example.com:8929' # 设置的是内部 nginx 监听的端口，需要同时开放 8929 端口即 8929:8929，容器内部用 80 就行，没啥修改的必要
+# hostname: gitlab.example.com # 这个也是，设置的是容器内的 hostname 没啥修改的必要，只是容器内能通过该域名访问而已，宿主机上要想访问需要在宿主机上配置 hosts 文件，但是容器内部会自动生成一些 gitlab.example.com 之类的子页面，用默认的就行
+# 容器启动速度比较慢，502 错误时等一会儿
+
+# command:
+# export gitlab_path="$(pwd)/gitlab" && docker compose -f docker-gitlab.yml up -d

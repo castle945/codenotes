@@ -1,0 +1,27 @@
+program: LeNet_Cifar10_wandb_sweep_cmd.py
+method: grid
+metric:
+  goal: maximize
+  name: eval/val_acc_epoch # 需与训练脚本中的指标名相同
+parameters:
+  lr:
+    values: [0.005, 0.01, 0.015] # 离散值列表的默认分布，即分类分布 categorical
+  batch_size:
+    values: [128, 256, 512]
+  epochs:
+    values: [20, 25]
+  use_sigmoid:
+    values: [True, False]
+    
+early_terminate:
+  type: hyperband
+  # 阶段轮次即 [min_iter, min_iter*eta, min_iter*(eta)**2,..]=[5, 15, 45]
+  min_iter: 5
+  eta: 3
+command:
+  - ${env}
+  - python
+  - ${program}
+  # - argparse param # argparse 可解析的参数
+  # - "-b" # 其他命令行参数，可能不被解析
+  - ${args} # sweep param

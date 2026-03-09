@@ -1,0 +1,56 @@
+
+function ask {
+  while true; do
+    read -p "$1 ([y]/n) " -r
+    REPLY=${REPLY:-"y"}
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      return 1
+    elif [[ $REPLY =~ ^[Nn]$ ]]; then
+      return 0
+    fi
+  done
+}
+
+
+
+sed -i -E '/^#/d; /^```/d; s/[[:space:]]*#.*$//; /^$/d' .zsh_history.md # 删除 # 开题的标题，```开头的代码块符号，以及行尾注释
+cat .zsh_history.md >> .zsh_history && rm -f .zsh_history.md
+function update {
+    # 创建新老配置文件的对比工作区
+    diff_dir=$(pwd)/oh-my-ubuntu
+    mkdir -p $diff_dir/{_old,new}
+    cd $(dirname $(readlink -f ${BASH_SOURCE[0]}))/home
+    find . -path './.oh-my-zsh' -prune -o -path './.fzf' -prune -o -type f -print | while IFS= read -r file; do
+        dir=$(dirname $file)
+        mkdir -p $diff_dir/new/$dir
+        echorun cp -rp $file $diff_dir/new/$dir
+        if [ -e $HOME/$file ]; then
+            mkdir -p $diff_dir/_old/$dir
+            echorun cp -rp $HOME/$file $diff_dir/_old/$dir
+        fi
+    done
+    info "A compare workspace has been created in $diff_dir, here are the differences"
+    echorun diff --color -r $diff_dir/_old $diff_dir/new
+    # 执行配置文件拷贝
+    local skip_zshrc=
+    if [ -z "$skip_zshrc" ]; then
+        ask "skip update .zshrc?"
+        skip_zshrc=$?
+    fi
+    if [[ $skip_zshrc -eq 1 ]]; then
+        echorun rm -f $diff_dir/new/.zshrc
+    fi
+    local choice=$1 # choice= 不赋值则为空
+    if [ -z "$choice" ]; then # 如果 choice 为空
+        ask "cp -rp $diff_dir/new/{.*,*} $HOME?"
+        choice=$?
+    fi
+    if [[ $choice -eq 1 ]]; then
+        shopt -s nullglob dotglob   # set glob options, to include hidden files
+        echorun cp -rp $diff_dir/new/* $HOME
+        shopt -u nullglob dotglob   # unset glob options
+    else
+        error "abort update files!"
+    fi
+}
+

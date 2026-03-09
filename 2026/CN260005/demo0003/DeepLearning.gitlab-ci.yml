@@ -1,0 +1,27 @@
+# 深度学习单元测试必要但持续集成不必要，变基前手动进行单元测试可以确保代码等价，加 CI 就徒增复杂度
+default:
+  image: njust.docker.com/city945/pcdet:cuda11.3-python3.8-pytorch1.11-devel
+
+# 定义管道中使用的不同阶段
+stages:
+  - Unit Test
+
+# 每个作业执行前，预先执行的脚本
+before_script:
+  - python --version ; pip --version  # For debugging
+  - nvidia-smi ; ls /datasets ; ls /workspace
+  - pip install pu4c
+  - python setup.py develop > /dev/null
+  - ln -s /workspace/files/blob/Det3DTrans/OpenPCDetTrans/data ./
+
+# 定义单元测试作业
+unit_test:
+  tags: [ pcdet-torch1.11 ]
+  stage: Unit Test
+  script:
+    - set -e
+    - export CUDA_VISIBLE_DEVICES=5
+    - python -m test.test_trainval --commit 3YwOVXm --cfg_file tools/cfgs/kitti_models/second.yaml
+    - python -m test.test_trainval --commit 3YwOVXm --cfg_file tools/cfgs/nuscenes_models/second_+multihead_+cbgs.yaml
+    - python -m test.test_trainval --commit 3YwOVXm --cfg_file tools/cfgs/waymo_models/second.yaml
+    - python -m test.test_pvrcnn --commit 3YwOVXm --cfg_file tools/cfgs/kitti_models/pv_rcnn.yaml; python -m test.test_pvrcnn --commit 3YwOVXm --cfg_file tools/cfgs/kitti_models/pv_rcnn.yaml --test

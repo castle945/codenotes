@@ -1,0 +1,11 @@
+<launch>
+    <arg name="rviz" default="true" />
+    
+    <param name="ROS_TEST_WS" value="$(find ros_test)"/>
+
+    <rosparam file="$(find ros_test)/config/test.yaml" command="load" />
+
+    <node pkg="ros_test" type="test_node" name="test_node" output="screen" />
+
+    <node if="$(arg rviz)" launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find ros_test)/rviz/test.rviz" />
+</launch>

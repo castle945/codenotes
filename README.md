@@ -6,4 +6,21 @@
 
 ### 收藏
 
-- Dockerfile 编写（ `CN260001` ）
+- CN260001.Dockerfile 编写
+- CN260010.Bash 脚本编写（待整理）
+
+### 索引
+
+#### 2026
+
+1. CN260001.Dockerfile 编写
+2. CN260002.Docker 私有部署 registry 服务
+3. CN260003.C++ 编译相关（ cmake 模板代码、cmake 模块）
+4. CN260004.ROS 示例代码（ ROS1 模板代码、ROS2 示例代码）
+5. ~~CN260005.GitLab CI/CD~~
+6. CN260006.Nginx 反向代理
+7. CN260007.经典 CNN 网络与 Pytorch 技巧（待整理）
+8. CN260008.Wandb 示例代码（待整理）
+9. CN260009.MMEngine 示例代码（待整理）
+10. CN260010.Bash 脚本编写（待整理）
+11. CN260011.README 模板

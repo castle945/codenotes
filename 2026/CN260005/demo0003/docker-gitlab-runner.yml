@@ -1,0 +1,28 @@
+services:
+  gitlab-runner:
+    image: gitlab/gitlab-runner:ubuntu
+    restart: always
+    volumes:
+      # 持久化文件，使容器重启后之前注册过的 Runner 等依然存在，不想要可以直接删除主机上的挂载目录
+      - ${gitlab_runner_path}/config:/etc/gitlab-runner
+      # 此挂载允许容器访问主机的 Docker 守护进程，这是为了使 GitLab Runner 能够直接使用主机上的 Docker 引擎来构建镜像、运行容器等操作，而无需在容器内部安装 Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      # 如果使用 Docker Machine 才需要
+      # - ${gitlab_runner_path}/docker-machine-config:/root/.docker/machine
+    network_mode: host # 此镜像不需要用什么端口，与 gitlab-ce 直接是 http 方式通信
+    container_name: gitlab-runner
+
+# @! gitlab-runner 不能和 gitlab 在同一台主机上，容器内运行 gitlab-runner 的方式最好搭配 excutor=docker 的方式使用，否则需要容器装依赖库
+
+# command:
+# docker run -itd --restart=always --network=host -v $(pwd)/gitlab-runner/config:/etc/gitlab-runner -v /var/run/docker.sock:/var/run/docker.sock gitlab/gitlab-runner:ubuntu --name gitlab-runner
+# export gitlab_runner_path="/srv/gitlab-runner"   && docker compose -f docker-gitlab-runner.yml up -d
+# export gitlab_runner_path="$(pwd)/gitlab-runner" && docker compose -f docker-gitlab-runner.yml up -d
+
+# 注册 Runner 如果 excutor=docker 需要挂载目录，不需要挂载到 gitlab-runner 容器中
+# docker exec -it gitlab-runner bash -c "\
+#     gitlab-runner register --non-interactive --url http://192.10.84.160:7106 --clone-url http://192.10.84.160:7106 \
+#     --executor 'docker' --docker-network-mode 'host' --docker-privileged --docker-runtime 'nvidia' \
+#     --env 'NVIDIA_VISIBLE_DEVICES=all' \
+#     --docker-volumes '/datasets:/datasets' --docker-volumes '/home/xc/workspace:/workspace' \
+#     --docker-image njust.docker.com/city945/pcdet:cuda11.3-python3.8-pytorch1.11-devel --name pcdet-torch1.11 --token glrt-t1_u4x8ZRTaZpWzDNWQs7oe"

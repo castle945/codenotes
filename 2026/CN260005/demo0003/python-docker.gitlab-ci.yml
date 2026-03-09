@@ -1,0 +1,34 @@
+# 定义所有作业共用的默认镜像、服务或变量
+default:
+  image: python:3.10
+
+# 定义缓存策略以加快构建速度
+cache:
+  paths:
+    - .cache/pip
+
+# 定义管道中使用的不同阶段
+stages:
+  - Build
+  - Unit Test
+  - Integration Test
+
+# 定义安装依赖项的作业
+install_dependencies:
+  stage: Build
+  script:
+    - python --version ; pip --version  # For debugging
+    - pip install -r requirements.txt
+    - pip install -e .
+
+# 定义单元测试作业
+unit_test:
+  stage: Unit Test
+  script:
+    - python -m unittest test.unit.test_main
+
+# 定义集成测试作业
+integration_test:
+  stage: Integration Test
+  script:
+    - python -m unittest test.integration.test_integration_main

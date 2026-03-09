@@ -1,0 +1,46 @@
+# 注册本地计算机为 Runner 并使用
+# 1. 仓库设置 -> CI/CD -> Runners -> 新建项目 runner，填写标签，进入注册页面
+# 2. 遵循注册页面的提示，在本地计算机上下载并安装 GitLab Runner，并将其注册到 GitLab 项目中
+# 3. 本地计算机启动 gitlab-runner run 再正常推送即可
+# excutor: docker 并填写镜像名称，这里配置文件写了镜像名，命令行填写的镜像名不会使用
+
+# 定义所有作业共用的默认镜像、服务或变量
+default:
+  # @! 注意
+  # 1. 每个阶段的任务开始时都会拉取镜像（即使本地已存在镜像也会访问 docker.io 故建议开 VPN 或填写国内镜像源的镜像）
+  # 2. 每个阶段的作业顺序执行，如果 excutor=shell 时，是顺序执行脚本，如果 excutor=docker 时，每个作业结束后都会提交当前层的环境，后续层则是拉原始镜像应用之前层的环境
+  image: docker.unsee.tech/python:3.10
+
+# 定义缓存策略以加快构建速度
+cache:
+  paths:
+    - .cache/pip
+
+# 定义管道中使用的不同阶段
+stages:
+  - Build
+  - Unit Test
+  - Integration Test
+
+# 定义安装依赖项的作业
+install_dependencies:
+  tags: [ precision-docker-py3.10 ]
+  stage: Build
+  script:
+    - python --version ; pip --version  # For debugging
+    - pip install -r requirements.txt
+    - pip install -e .
+
+# 定义单元测试作业
+unit_test:
+  tags: [ precision-docker-py3.10 ]
+  stage: Unit Test
+  script:
+    - python -m unittest test.unit.test_main
+
+# 定义集成测试作业
+integration_test:
+  tags: [ precision-docker-py3.10 ]
+  stage: Integration Test
+  script:
+    - python -m unittest test.integration.test_integration_main

@@ -1,0 +1,23 @@
+# 定义管道中使用的不同阶段
+stages:
+  - Build
+  - Unit Test
+  - Integration Test
+
+# 定义安装依赖项的作业
+install_dependencies:
+  stage: Build
+  script:
+    echo "Installing dependencies..."
+
+# 定义单元测试作业
+unit_test:
+  stage: Unit Test
+  script:
+    echo "Running unit tests..."
+
+# 定义集成测试作业
+integration_test:
+  stage: Integration Test
+  script:
+    - echo "Running integration tests..."

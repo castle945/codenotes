@@ -35,4 +35,4 @@ services:
     container_name: registry-server
 
 # command:
-# export registry_path="$(pwd)/registry" && docker compose -f docker-registry-ui.yml up -d
+# export registry_path="$(pwd)/registry" && docker compose -f docker-registry-ui.yaml up -d

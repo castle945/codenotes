@@ -1,0 +1,3 @@
+cloud_frame: "livox_frame"
+cloud_topic: "/livox/lidar"
+total_merge_num: 10

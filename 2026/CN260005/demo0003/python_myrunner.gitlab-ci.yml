@@ -1,0 +1,40 @@
+# 注册本地计算机为 Runner 并使用
+# 1. 仓库设置 -> CI/CD -> Runners -> 新建项目 runner，填写标签，进入注册页面
+# 2. 遵循注册页面的提示，在本地计算机上下载并安装 GitLab Runner，并将其注册到 GitLab 项目中
+# 3. 本地计算机启动 gitlab-runner run 再正常推送即可
+# excutor: shell
+
+# 定义缓存策略以加快构建速度
+cache:
+  paths:
+    - .cache/pip
+
+# 定义管道中使用的不同阶段
+stages:
+  - Build
+  - Unit Test
+  - Integration Test
+
+# 定义安装依赖项的作业
+install_dependencies:
+  tags: [ precision-py3.8 ]               # 指定 Runner 的标签
+  stage: Build
+  script:
+    # 确保命令存在，pip3 安装 apt install -y python3-pip
+    - python3 --version ; pip3 --version  # For debugging
+    - pip3 install -r requirements.txt
+    - pip3 install -e .
+
+# 定义单元测试作业
+unit_test:
+  tags: [ precision-py3.8 ]
+  stage: Unit Test
+  script:
+    - python3 -m unittest test.unit.test_main
+
+# 定义集成测试作业
+integration_test:
+  tags: [ precision-py3.8 ]
+  stage: Integration Test
+  script:
+    - python3 -m unittest test.integration.test_integration_main

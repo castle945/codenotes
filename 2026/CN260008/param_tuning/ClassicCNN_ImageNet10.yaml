@@ -1,0 +1,61 @@
+program: ClassicCNN_ImageNet10.py
+method: grid
+metric:
+  goal: maximize
+  name: eval/val_acc_epoch # 需与训练脚本中的指标名相同
+parameters:
+  lr:
+    values: [0.0005, 0.001, 0.0015]
+  batch_size:
+    values: [32, 64]
+  init_weight:
+    values: [True, False]
+  use_bias:
+    values: [True, False]
+  epochs:
+    value: 35 # 从 eval/val_acc_epoch 曲线可知 35 轮左右足够收敛
+early_terminate:
+  type: hyperband
+  # 阶段轮次即 [min_iter, min_iter*eta, min_iter*(eta)**2,..]=[5, 15, 45]
+  min_iter: 5
+  eta: 3
+command:
+  - ${env}
+  - python
+  - ${program}
+  - ${args}
+
+# # 先用贝叶斯优化获取较优的(无关本实验的其他)超参数区间，再进行网格搜索获取可解释性
+# # 界面创建 sweep 粘贴配置，再运行命令: CUDA_VISIBLE_DEVICES=0 wandb agent city945/WandbTest/ore3q2h8 --count 18
+# program: ClassicCNN_ImageNet10.py
+# method: bayes
+# metric:
+#   goal: maximize
+#   name: eval/val_acc_epoch # 需与训练脚本中的指标名相同
+# parameters:
+#   lr:
+#     distribution: uniform # 连续值范围的默认分布，即均匀分布
+#     min: 0.001
+#     max: 0.02
+#   batch_size:
+#     # 量化对数均匀分布，即按步长为 q 均匀递增，int_uniform: 按 1 递增
+#     distribution: q_log_uniform_values
+#     q: 16
+#     min: 16
+#     max: 64
+#   epochs:
+#     distribution: q_log_uniform_values
+#     q: 5
+#     min: 20
+#     max: 40
+    
+# early_terminate:
+#   type: hyperband
+#   # 阶段轮次即 [min_iter, min_iter*eta, min_iter*(eta)**2,..]=[5, 15, 45]
+#   min_iter: 5
+#   eta: 3
+# command:
+#   - ${env}
+#   - python
+#   - ${program}
+#   - ${args}

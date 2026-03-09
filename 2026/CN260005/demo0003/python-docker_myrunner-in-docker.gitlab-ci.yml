@@ -1,0 +1,41 @@
+# 不在宿主机上安装 gitlab-runner 而使用 gitlab/gitlab-runner:ubuntu 镜像中的 gitlab-runner 运行器
+# docker run -itd --network=host -v /srv/gitlab-runner/config:/etc/gitlab-runner -v /var/run/docker.sock:/var/run/docker.sock --name gitlab-runner gitlab/gitlab-runner:ubuntu # 此方式注册后不需要再 gitlab-runner run 了
+# /var/run/docker.sock:/var/run/docker.sock 此挂载允许容器访问主机的 Docker 守护进程，这是为了使 GitLab Runner 能够直接使用主机上的 Docker 引擎来构建镜像、运行容器等操作，而无需在容器内部安装 Docker
+
+# 定义所有作业共用的默认镜像、服务或变量
+default:
+  image: docker.unsee.tech/python:3.10
+
+# 定义缓存策略以加快构建速度
+cache:
+  paths:
+    - .cache/pip
+
+# 定义管道中使用的不同阶段
+stages:
+  - Build
+  - Unit Test
+  - Integration Test
+
+# 定义安装依赖项的作业
+install_dependencies:
+  tags: [ precision-docker-py3.10-RunnerInDocker ]
+  stage: Build
+  script:
+    - python --version ; pip --version  # For debugging
+    - pip install -r requirements.txt
+    - pip install -e .
+
+# 定义单元测试作业
+unit_test:
+  tags: [ precision-docker-py3.10-RunnerInDocker ]
+  stage: Unit Test
+  script:
+    - python -m unittest test.unit.test_main
+
+# 定义集成测试作业
+integration_test:
+  tags: [ precision-docker-py3.10-RunnerInDocker ]
+  stage: Integration Test
+  script:
+    - python -m unittest test.integration.test_integration_main
